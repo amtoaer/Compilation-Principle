@@ -1,0 +1,3 @@
+# ignore Graphviz temp files
+*.gv
+*.png
