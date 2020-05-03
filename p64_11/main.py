@@ -18,25 +18,41 @@ class id():
 class node():
     # 状态节点类
     def __init__(self, id):
+        # 该状态id
         self.id = id
+        # 该状态指向其它状态的边（二元组，形式为[终点，边名]）
         self.to = []
+        # 标志是否是起点/终点
         self.isStart = False
         self.isEnd = False
+        # 遍历时的标记变量
         self.isVisited = False
 
     def nodeId(self):
+        # 返回该状态id
         return self.id
 
     def pointTo(self, to, edge):
+        # 将边的二元组添加到self.to中
         self.to.append([to, edge])
 
+    def getDst(self, edge):
+        # 通过边名得到终点list
+        result = []
+        for item in self.to:
+            if item[1] == edge:
+                result.append(item[0])
+        return result
+
     def toStr(self):
+        # 打印所有以该状态为起点的边
         if self.to:
             for item in self.to:
                 print('[{}]==[{}]=>[{}]'.format(
                     self.id, item[1], item[0].nodeId()))
 
     def draw(self, pic):
+        # 使用Graphviz绘图
         # 绘制点
         label = str(self.id)
         if self.isStart:
@@ -54,25 +70,35 @@ class node():
 class nodeList():
     # 封装状态节点数组
     def __init__(self):
+        # list存储所有状态节点
         self.list = []
+        # id用来依次给状态编号
         self.id = id()
 
     def getNode(self, index=-1):
+        # 获取指定位置的状态节点
         try:
             return self.list[index]
         except IndexError:
             print('错误：数组越界')
 
     def newNode(self):
+        # 添加新状态节点
         self.list.append(node(self.id.getId()))
         return self.getNode()
 
     def getResult(self):
+        # 打印所有边
         for item in self.list:
             item.toStr()
 
+    def clearHistory(self):
+        # 清空遍历历史
+        for item in self.list:
+            item.isVisited = False
+
     def drawPic(self, pic):
-        # 全部绘制并展示
+        # 绘制状态图
         for item in self.list:
             item.draw(pic)
         try:
@@ -127,15 +153,12 @@ def toNFA():
             starts[-2].pointTo(starts[-1], str[i])
         i = i + 1
     starts[-1].isEnd = True
+    print('-----------------')
     print('NFA连接情况')
     nodes.getResult()
     print('-----------------')
     # 绘制NFA
     nodes.drawPic(NFA)
-
-
-def toMinDFA():
-    pass
 
 
 def toDFA():
@@ -147,85 +170,99 @@ def toDFA():
     count = int(input('请输入状态数量(编号为0，1，2，...)：'))
     for _ in range(count):
         originNodes.newNode()
-    print('请输入起点编号（以-1结束）：')
-    while (True):
-        tmp = int(input())
-        if tmp != -1:
-            originNodes.getNode(tmp).isStart = True
-        else:
-            break
-    print('请输入终点编号（以-1结束）：')
-    while (True):
-        tmp = int(input())
-        if tmp != -1:
-            originNodes.getNode(tmp).isEnd = True
-        else:
-            break
+    print('请输入起点编号：')
+    startIndex = int(input())
+    originNodes.getNode(startIndex).isStart = True
+    print('请输入终点编号：')
+    endIndex = int(input())
+    originNodes.getNode(endIndex).isEnd = True
+
     print('请输入边信息（格式为“起点编号 终点编号 边名”，以-1结束）：')
     while (True):
-        start = int(input())
+        tmp = input().split(' ')
+        start = int(tmp[0])
         if start != -1:
-            end = int(input())
-            edge = input()
+            end = int(tmp[1])
+            edge = tmp[2]
             originNodes.getNode(start).pointTo(originNodes.getNode(end), edge)
             alphabet.append(edge)
         else:
             break
     # 字母表去重
     alphabet = list(set(alphabet))
-    # 单设节点组用于存储DFA状态信息
-    # 一集合用于保存所有出现过的状态集，另一集合用作栈
-    DFANodes = nodeList()
-    DFASet = []
-    tempStack = []
-    # 构建起点集
-    begin = []
-    # 该变量用于标记起点中是否含有终点
-    isEnd = False
-    for node in originNodes.list:
-        if node.isStart:
-            begin.append(node)
-            isEnd = isEnd or node.isEnd
-    # 将起点加入双列表
-    DFASet.append(begin)
-    tempStack.append(begin)
-    # 新状态节点作为起始状态
-    temp = DFANodes.newNode()
-    temp.isStart = True
-    temp.isEnd = isEnd
-    while tempStack:
-        start = tempStack.pop()
+    # 删掉字母表中的ε
+    alphabet.remove('ε')
+    # 构造空闭环列表
+    closure = []
+    for item in originNodes.list:
+        dst = item.getDst('ε')
+        stack = list(dst)
+        dst.append(item)
+        for node in stack:
+            node.isVisited = True
+        while stack:
+            tmp = stack.pop().getDst('ε')
+            dst = dst+tmp
+            for node in tmp:
+                if not node.isVisited:
+                    stack.append(node)
+                    node.isVisited = True
+        closure.append(list(set(dst)))
+        originNodes.clearHistory()
+    # 标记起点的空闭环
+    start = closure[startIndex]
+    # 初始化新的状态节点列表（重新构造图）
+    newNodes = nodeList()
+    newNodes.newNode()
+    newNodes.getNode().isStart = True
+    # tmpNodes存储新节点，stack作为栈使用
+    tmpNodes = [start]
+    stack = [start]
+    while stack:
+        # 从栈中弹出一个状态集
+        tmp = stack.pop()
+        # 记录该集合对应的状态节点列表中的节点
+        startNode = newNodes.getNode(tmpNodes.index(tmp))
+        # 遍历字母表中的所有内容
         for letter in alphabet:
+            dst = []
+            # 遍历状态集中的所有状态，记录他们跳转到的节点，存入到dst中
+            for node in tmp:
+                dst += node.getDst(letter)
+            # 对dst去重（此时的dst保存的是跳转到的状态）
+            dst = list(set(dst))
             result = []
-            # 得到当前处理的起点角标
-            startIndex = DFASet.index(start)
-            for node in start:
-                result += node.getEnd(letter)
-            # 对result进行去重，得到跳转结果
+            for node in dst:
+                # 得到该节点的编号
+                index = originNodes.list.index(node)
+                # 获取对应编号的空闭环
+                result += closure[index]
+            # 对result去重
             result = list(set(result))
-            # 如果状态集未出现过且不为空，则将其压栈，加入出现过的状态集，取对应节点，插入边
-            if result:
-                if result not in DFASet:
-                    DFASet.append(result)
-                    tempStack.append(result)
-                    tmp = DFANodes.newNode()
-                    DFANodes.getNode(startIndex).pointTo(
-                        tmp, letter)
-                    isEnd = False
-                    isStart = False
-                    for node in result:
-                        isEnd = isEnd or node.isEnd
-                        isStart = isStart or node.isStart
-                    tmp.isStart = isStart
-                    tmp.isEnd = isEnd
-                else:
-                    DFANodes.getNode(startIndex).pointTo(
-                        DFANodes.getNode(DFASet.index(result)), letter)
-    # 操作完成，打印结果
+            if result not in tmpNodes:
+                # 对新状态编号，保存，入栈，进行相应指向
+                tmpNodes.append(result)
+                stack.append(result)
+                newNodes.newNode()
+                startNode.pointTo(newNodes.getNode(), letter)
+                # 如果状态集中有原来的终点，则该状态集同样作为终点
+                if originNodes.getNode(endIndex) in result:
+                    newNodes.getNode().isEnd = True
+            else:
+                # 否则仅进行相应指向
+                startNode.pointTo(newNodes.getNode(
+                    tmpNodes.index(result)), letter)
+    # 构造DFA结束，打印结果
+    print('-----------------')
     print('DFA连接情况')
-    DFANodes.getResult()
-    # 画图
-    DFANodes.drawPic(DFA)
+    newNodes.getResult()
+    print('-----------------')
+    # 绘制DFA
+    newNodes.drawPic(DFA)
+
+
+def toMinDFA():
+    print('待实现')
 
 
 def main():
