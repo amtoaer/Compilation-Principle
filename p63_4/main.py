@@ -5,7 +5,7 @@ keyWord = ['main', 'int', 'if', 'else', 'while', 'do']
 # 界符、运算符
 symbol = ['<', '>', '!=', '>=', '<=', '==', ',', ';',
           '(', ')', '{', '}', '+', '-', '*', '/', '=', '+=', '-=', '*=', '/=']
-# 构造界符可接受字符的符号表
+# 构造可接受字符的符号表
 tmp = []
 for item in symbol:
     for char in item:
@@ -53,7 +53,7 @@ def handleSubStr(content, pos):
                 token += content[pos]
             else:
                 if token in symbol:
-                    print('{}:界符'.format(token))
+                    print('{}:界符/运算符'.format(token))
                     return pos
                 else:
                     break
@@ -75,7 +75,7 @@ def handleStr(content):
 
 def main():
     # 读取文件
-    with open('./test.c', 'r') as f:
+    with open('/home/jeasonlau/Documents/repositories/CP/p63_4/test.c', 'r') as f:
         content = f.read()
     # 处理字符串
     handleStr(content)

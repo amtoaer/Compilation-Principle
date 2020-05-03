@@ -74,7 +74,7 @@ def getResult(f, count):
 def main():
     # count用于标记行数，方便报错
     count = 1
-    f = open('./test.pas', 'r')
+    f = open('/home/jeasonlau/Documents/repositories/CP/p63_1/test.pas', 'r')
     results = []
     result = ''
     while True:
