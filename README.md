@@ -40,15 +40,15 @@
 
 ### P63
 
-+   >   去掉了`Pascal`代码中的注释。
++   去掉了`Pascal`代码中的注释。
 
     ![深度截图_选择区域_20200504001414](https://i.loli.net/2020/05/04/qfYZD3BI7aGQO8b.png)
 
-+   >   输出的具体表示还需要看源码（XD
++   输出的具体表示还需要看源码（XD
 
     ![深度截图_选择区域_20200504001519](https://i.loli.net/2020/05/04/RQ5geBVMNF2Kmvq.png)
 
-+   >   输出内容待修改
++   输出内容待修改
 
     ![深度截图_选择区域_20200504001543](https://i.loli.net/2020/05/04/V7iwbeZBWUDRzj3.png)
 
@@ -67,8 +67,22 @@
         >   ![20150106120049890](https://i.loli.net/2020/05/04/dfDVjBeLkHSQWxY.jpg)
         >
         >   标准结果为：
-		>
+        >
         >   ![20150106200611099](https://i.loli.net/2020/05/04/a4TsxNzJQdntlMZ.jpg)
 
         ![深度截图_选择区域_20200504001930](https://i.loli.net/2020/05/04/hFHTK6qzwMnfNmu.png)
 
+
+    +   `DFA`最小化
+
+        >   测试样例选自[这篇文章](https://zhuanlan.zhihu.com/p/37900383).
+        >
+        >   测试`DFA`为（S为起点，从左到右，从上到下编号）：
+        >
+        >   ![v2-061cc56f74ff217c60e04da44d03cbaa_720w](https://i.loli.net/2020/05/04/mODqdcMnC1fiPyt.jpg)
+        >
+        >   标准结果为：
+        >
+        >   ![v2-9cdbf7afbe6227ae1e0eb36d880e7573_720w](https://i.loli.net/2020/05/04/NfQt3IajVvRHnCJ.jpg)
+
+        ![深度截图_选择区域_20200504182248](https://i.loli.net/2020/05/04/V2r7zFOie6CXcwW.png)
