@@ -173,9 +173,11 @@ def toDFA():
     print('请输入起点编号：')
     startIndex = int(input())
     originNodes.getNode(startIndex).isStart = True
-    print('请输入终点编号：')
-    endIndex = int(input())
-    originNodes.getNode(endIndex).isEnd = True
+    print('请输入终点编号：(多终点用空格分割）')
+    endIndex = input().split(' ')
+    endIndex = [int(item) for item in endIndex]
+    for index in endIndex:
+        originNodes.getNode(index).isEnd = True
 
     print('请输入边信息（格式为“起点编号 终点编号 边名”，以-1结束）：')
     while (True):
@@ -215,6 +217,12 @@ def toDFA():
     newNodes = nodeList()
     newNodes.newNode()
     newNodes.getNode().isStart = True
+    # 判断起点是否也是终点
+    for node in start:
+        if node.isEnd == True:
+            newNodes.getNode().isEnd = True
+            break
+
     # tmpNodes存储新节点，stack作为栈使用
     tmpNodes = [start]
     stack = [start]
@@ -240,14 +248,18 @@ def toDFA():
             # 对result去重
             result = list(set(result))
             if result not in tmpNodes:
-                # 对新状态编号，保存，入栈，进行相应指向
-                tmpNodes.append(result)
-                stack.append(result)
-                newNodes.newNode()
-                startNode.pointTo(newNodes.getNode(), letter)
-                # 如果状态集中有原来的终点，则该状态集同样作为终点
-                if originNodes.getNode(endIndex) in result:
-                    newNodes.getNode().isEnd = True
+                # 需要确保result非空集合
+                if result:
+                    # 对新状态编号，保存，入栈，进行相应指向
+                    tmpNodes.append(result)
+                    stack.append(result)
+                    newNodes.newNode()
+                    startNode.pointTo(newNodes.getNode(), letter)
+                    # 如果状态集中有原来的终点，则该状态集同样作为终点
+                    for node in result:
+                        if node.isEnd == True:
+                            newNodes.getNode().isEnd = True
+                            break
             else:
                 # 否则仅进行相应指向
                 startNode.pointTo(newNodes.getNode(
