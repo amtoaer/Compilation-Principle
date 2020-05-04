@@ -166,7 +166,7 @@ def toDFA():
     DFA = Digraph('DFA', comment="DFA", format="png")
     DFA.graph_attr['rankdir'] = 'LR'
     originNodes = nodeList()
-    alphabet = []
+    alphabet = set()
     count = int(input('请输入状态数量(编号为0，1，2，...)：'))
     for _ in range(count):
         originNodes.newNode()
@@ -178,7 +178,6 @@ def toDFA():
     endIndex = [int(item) for item in endIndex]
     for index in endIndex:
         originNodes.getNode(index).isEnd = True
-
     print('请输入边信息（格式为“起点编号 终点编号 边名”，以-1结束）：')
     while (True):
         tmp = input().split(' ')
@@ -187,13 +186,12 @@ def toDFA():
             end = int(tmp[1])
             edge = tmp[2]
             originNodes.getNode(start).pointTo(originNodes.getNode(end), edge)
-            alphabet.append(edge)
+            alphabet.add(edge)
         else:
             break
-    # 字母表去重
-    alphabet = list(set(alphabet))
     # 删掉字母表中的ε
-    alphabet.remove('ε')
+    if 'ε' in alphabet:
+        alphabet.remove('ε')
     # 构造空闭环列表
     closure = []
     for item in originNodes.list:
@@ -222,7 +220,6 @@ def toDFA():
         if node.isEnd == True:
             newNodes.getNode().isEnd = True
             break
-
     # tmpNodes存储新节点，stack作为栈使用
     tmpNodes = [start]
     stack = [start]
@@ -274,7 +271,120 @@ def toDFA():
 
 
 def toMinDFA():
-    print('待实现')
+    # 最小DFA
+    minDFA = Digraph('minDFA', comment="minDFA", format="png")
+    minDFA.graph_attr['rankdir'] = 'LR'
+    # 输入方法同上
+    originNodes = nodeList()
+    alphabet = set()
+    count = int(input('请输入状态数量(编号为0，1，2，...)：'))
+    for _ in range(count):
+        originNodes.newNode()
+    print('请输入起点编号：')
+    startIndex = int(input())
+    originNodes.getNode(startIndex).isStart = True
+    print('请输入终点编号：(多终点用空格分割）')
+    endIndex = input().split(' ')
+    endIndex = [int(item) for item in endIndex]
+    for index in endIndex:
+        originNodes.getNode(index).isEnd = True
+    print('请输入边信息（格式为“起点编号 终点编号 边名”，以-1结束）：')
+    while (True):
+        tmp = input().split(' ')
+        start = int(tmp[0])
+        if start != -1:
+            end = int(tmp[1])
+            edge = tmp[2]
+            originNodes.getNode(start).pointTo(originNodes.getNode(end), edge)
+            alphabet.add(edge)
+        else:
+            break
+    # 构造终点集和非终点集
+    end = set()
+    notEnd = set()
+    for item in originNodes.list:
+        if item.isEnd == True:
+            end.add(item)
+        else:
+            notEnd.add(item)
+    # 构造栈和状态集
+    stack = []
+    stack.append(end)
+    stack.append(notEnd)
+    stateSetList = []
+    stateSetList.append(end)
+    stateSetList.append(notEnd)
+    # 进行不等价状态的分割
+    while stack:
+        tmp = stack.pop()
+        # 首先将整个状态集作为一个列表
+        splitSetList = [tmp]
+        # 考查所有符号
+        for letter in alphabet:
+            newSplitSetList = []
+            for splitSet in splitSetList:
+                # 如果状态集中只有一个状态，则肯定不能继续划分
+                if len(splitSet) == 1:
+                    print('跳出', list(item.nodeId() for item in splitSet))
+                    continue
+                # tmpSetList用于存储跳转到相同状态集的状态
+                print('当前集合为', list(item.nodeId() for item in splitSet))
+                print('当前字母为', letter)
+                tmpSetList = []
+                for _ in range(len(stateSetList)):
+                    tmpSetList.append(set())
+                # 遍历状态集中的每个状态节点
+                for node in splitSet:
+                    # 因为是对DFA最小化，所以getDst肯定只返回一个终点，故取index=0的点即可
+                    dst = node.getDst(letter)[0]
+                    # 对跳转到不同状态集的状态进行了划分
+                    for index in range(len(stateSetList)):
+                        if dst in stateSetList[index]:
+                            tmpSetList[index].add(node)
+                            break
+                # 删除未分割的集合
+                stateSetList.remove(splitSet)
+                # 加入分割后的状态集合
+                for tmpSet in tmpSetList:
+                    if tmpSet:
+                        stateSetList.append(tmpSet)
+                        newSplitSetList.append(tmpSet)
+            splitSetList = newSplitSetList
+    # 准备连线画图
+    newNodes = nodeList()
+    print('-----------------')
+    print('分割后的状态集为：')
+    num = 0
+    for item in stateSetList:
+        print(list(tmp.nodeId() for tmp in item), ':', num)
+        newNodes.newNode()
+        num += 1
+    print('-----------------')
+    # 为了取元素，需要把set转为list
+    stateSetList = [list(stateSet) for stateSet in stateSetList]
+    # 遍历状态集合
+    for index in range(len(stateSetList)):
+        # 重新标记起点和终点
+        for state in stateSetList[index]:
+            if state.isStart == True:
+                newNodes.getNode(index).isStart = True
+            if state.isEnd == True:
+                newNodes.getNode(index).isEnd = True
+        # 嵌套遍历，处理边
+        for letter in alphabet:
+            # 因为集合中的都是等价状态，所以只需取每个集合中的第一个状态，得到letter边的终点
+            dst = stateSetList[index][0].getDst(letter)[0]
+            # 遍历查看letter边的终点在哪个集合中，使用pointTo为新状态节点建立边
+            for dstIndex in range(len(stateSetList)):
+                if dst in stateSetList[dstIndex]:
+                    newNodes.getNode(index).pointTo(
+                        newNodes.getNode(dstIndex), letter)
+                    break
+    print('minDFA连接情况')
+    newNodes.getResult()
+    print('-----------------')
+    # 绘制minDFA
+    newNodes.drawPic(minDFA)
 
 
 def main():
