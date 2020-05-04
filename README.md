@@ -34,7 +34,7 @@
 
 ### P64
 
-+   正规式转`NFA`，`NFA`转`DFA`已完成，`DFA`状态最少化正在施工。
++   正规式转`NFA`，`NFA`转`DFA`已完成，`DFA`状态最少化基本完工。（忘记写去除无用状态了qaq）
 
 ## 截图
 
@@ -71,10 +71,9 @@
         >   ![20150106200611099](https://i.loli.net/2020/05/04/a4TsxNzJQdntlMZ.jpg)
 
         ![深度截图_选择区域_20200504001930](https://i.loli.net/2020/05/04/hFHTK6qzwMnfNmu.png)
-
-
+        
     +   `DFA`最小化
-
+    
         >   测试样例选自[这篇文章](https://zhuanlan.zhihu.com/p/37900383).
         >
         >   测试`DFA`为（S为起点，从左到右，从上到下编号）：
