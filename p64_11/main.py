@@ -325,23 +325,27 @@ def toMinDFA():
             for splitSet in splitSetList:
                 # 如果状态集中只有一个状态，则肯定不能继续划分
                 if len(splitSet) == 1:
-                    print('跳出', list(item.nodeId() for item in splitSet))
                     continue
                 # tmpSetList用于存储跳转到相同状态集的状态
-                print('当前集合为', list(item.nodeId() for item in splitSet))
-                print('当前字母为', letter)
                 tmpSetList = []
-                for _ in range(len(stateSetList)):
+                for _ in range(len(stateSetList)+1):
                     tmpSetList.append(set())
                 # 遍历状态集中的每个状态节点
                 for node in splitSet:
-                    # 因为是对DFA最小化，所以getDst肯定只返回一个终点，故取index=0的点即可
-                    dst = node.getDst(letter)[0]
-                    # 对跳转到不同状态集的状态进行了划分
-                    for index in range(len(stateSetList)):
-                        if dst in stateSetList[index]:
-                            tmpSetList[index].add(node)
-                            break
+                    # 因为是对DFA最小化，所以getDst肯定只返回一个或0个终点
+                    dst = node.getDst(letter)
+                    # 如果存在该边
+                    if dst:
+                        dst = dst[0]
+                        # 对跳转到不同状态集的状态进行了划分
+                        for index in range(len(stateSetList)):
+                            if dst in stateSetList[index]:
+                                tmpSetList[index].add(node)
+                                break
+                    # 不存在
+                    else:
+                        # 跳转到空的状态存入到tempSetList[len(stateSetList)]
+                        tmpSetList[len(stateSetList)].add(node)
                 # 删除未分割的集合
                 stateSetList.remove(splitSet)
                 # 加入分割后的状态集合
@@ -373,13 +377,15 @@ def toMinDFA():
         # 嵌套遍历，处理边
         for letter in alphabet:
             # 因为集合中的都是等价状态，所以只需取每个集合中的第一个状态，得到letter边的终点
-            dst = stateSetList[index][0].getDst(letter)[0]
-            # 遍历查看letter边的终点在哪个集合中，使用pointTo为新状态节点建立边
-            for dstIndex in range(len(stateSetList)):
-                if dst in stateSetList[dstIndex]:
-                    newNodes.getNode(index).pointTo(
-                        newNodes.getNode(dstIndex), letter)
-                    break
+            dst = stateSetList[index][0].getDst(letter)
+            if dst:
+                dst = dst[0]
+                # 遍历查看letter边的终点在哪个集合中，使用pointTo为新状态节点建立边
+                for dstIndex in range(len(stateSetList)):
+                    if dst in stateSetList[dstIndex]:
+                        newNodes.getNode(index).pointTo(
+                            newNodes.getNode(dstIndex), letter)
+                        break
     print('minDFA连接情况')
     newNodes.getResult()
     print('-----------------')
