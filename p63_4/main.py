@@ -1,16 +1,16 @@
 #!/usr/bin/python
 # 简单的c语言词法分析器
+# 种别码规则：标识符为0，关键字依次从1到6，界符、运算符依次从7到29，整数为30
 # 关键字
 keyWord = ['main', 'int', 'if', 'else', 'while', 'do']
 # 界符、运算符
 symbol = ['<', '>', '!=', '>=', '<=', '==', ',', ';',
-          '(', ')', '{', '}', '+', '-', '*', '/', '=', '+=', '-=', '*=', '/=']
+          '(', ')', '{', '}', '+', '-', '*', '/', '=', '+=', '-=', '*=', '/=', '++', '--']
 # 构造可接受字符的符号表
-tmp = []
+tmp = set()
 for item in symbol:
     for char in item:
-        tmp.append(char)
-tmp = list(set(tmp))
+        tmp.add(char)
 
 
 def handleSubStr(content, pos):
@@ -28,7 +28,7 @@ def handleSubStr(content, pos):
             if content[pos].isdigit():
                 token = token * 10 + int(content[pos])
             else:
-                print('{}:数字'.format(token))
+                print('({},30)'.format(token))
                 return pos
     # 字母开头
     elif content[pos].isalpha():
@@ -40,9 +40,9 @@ def handleSubStr(content, pos):
             else:
                 # 判断是关键字还是自定义标识符
                 if token in keyWord:
-                    print('{}:关键字'.format(token))
+                    print('({},{})'.format(token, keyWord.index(token)+1))
                 else:
-                    print('{}:标识符'.format(token))
+                    print('({},0)'.format(token))
                 return pos
     elif content[pos] in tmp:
         token = content[pos]
@@ -53,13 +53,16 @@ def handleSubStr(content, pos):
                 token += content[pos]
             else:
                 if token in symbol:
-                    print('{}:界符/运算符'.format(token))
+                    print('({},{})'.format(token, len(
+                        keyWord)+symbol.index(token)+1))
                     return pos
                 else:
                     break
     else:
         print('存在不合法字符，正在退出...')
         return False
+    print(token)
+    print(tmp)
     print('程序出现错误，请检查源代码是否正确。\n正在退出...')
     return False
 
