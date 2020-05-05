@@ -2,7 +2,7 @@
 Pascal共有三种注释写法：
     1.{content}
     2.//content
-    3.{*content*}
+    3.(*content*)
 以下分别处理。
 注：因为逐行处理的问题，暂不能处理多行注释
 '''
