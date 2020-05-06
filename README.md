@@ -50,9 +50,7 @@
 
     ![深度截图_选择区域_20200504001414](https://i.loli.net/2020/05/04/qfYZD3BI7aGQO8b.png)
 
-+   输出的具体表示还需要看源码（XD
-
-    ![深度截图_选择区域_20200504001519](https://i.loli.net/2020/05/04/RQ5geBVMNF2Kmvq.png)
++   ![深度截图_选择区域_20200506112205](https://i.loli.net/2020/05/06/NXRB4p3nEjIrfmZ.png)
 
 +   类型码编号规则写在了注释里
 
