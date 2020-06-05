@@ -1,8 +1,6 @@
 #!/usr/bin/python
-import sys
-
 '''
-这是一个c语言的词法分析器，目前已经支持了除浮点数外的大部分情况（并没有，还有很多情况没有支持XD），
+这是一个c语言的词法分析器，目前已经支持了大部分情况（并没有，还有很多情况没有支持XD），
 支持未闭合的单引号/双引号报错，字符长度不为1/字符串长度为0报错，不合法的字符报错
 '''
 
@@ -72,7 +70,7 @@ def handleLine(line, count):
                 if line[index] == '.':
                     # m用于标记小数位数
                     m = 0
-                    # index+=2，此时line[index]为小数点后第一位
+                    # index+=1，此时line[index]为小数点后第一位
                     index += 1
                     while line[index].isdigit():
                         m += 1
