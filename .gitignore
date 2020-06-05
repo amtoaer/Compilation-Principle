@@ -1,3 +1,5 @@
 # ignore Graphviz temp files
 *.gv
 *.png
+# ignore python cache file
+__pycache__
