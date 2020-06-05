@@ -11,7 +11,7 @@ class lexical_analyzer():
 
     def getToken(self):
         '''
-        返回五种结果： I,(,),w0,w1
+        返回六种结果： I,(,),w0,w1,#
         '''
         token = ''
         while self.__index < self.__length:
@@ -58,6 +58,9 @@ class lexical_analyzer():
             elif self.__line[self.__index] == '*' or self.__line[self.__index] == '/':
                 self.__index += 1
                 return 'w1'
+            elif self.__line[self.__index] == '#':
+                self.__index += 1
+                return '#'
             else:
                 print('unexpected word: {}'.format(self.__line[self.__index]))
                 exit()
