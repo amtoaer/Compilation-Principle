@@ -1,6 +1,6 @@
 int main(void)
 {
-    int a = 1, d = 2, c;
+    int a = 1, d = 2, c = 2.74 * 3;
     if (a <= d) {
         c = a;
         a = d;

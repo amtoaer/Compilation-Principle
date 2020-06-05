@@ -61,14 +61,25 @@ def handleLine(line, count):
                 if token not in iT:
                     iT.append(token)
                 print(output(token, 'iT', iT.index(token)))
-        # 目前只支持处理正整数
+        # 支持非负实数
         elif line[index].isdigit():
-            token = int(line[index])
-            index += 1
+            token = 0
             # 此处不判断越界原因同上
             while line[index].isdigit():
                 token = token * 10 + int(line[index])
                 index += 1
+                # 遇到小数点
+                if line[index] == '.':
+                    # m用于标记小数位数
+                    m = 0
+                    # index+=2，此时line[index]为小数点后第一位
+                    index += 1
+                    while line[index].isdigit():
+                        m += 1
+                        token = token * 10 + int(line[index])
+                        index += 1
+                    token = token * pow(10, -m)
+                    break
             if token not in CT:
                 CT.append(token)
             print(output(token, 'CT', CT.index(token)))
@@ -129,29 +140,12 @@ def handleLine(line, count):
 
 
 def main():
-    try:
-        print('尝试重定向输出到"./result"中')
-        old = sys.stdout
-        fileOut = open(
-            '/home/jeasonlau/Documents/repositories/CP/Experiment_1/result', 'w')
-        # 如果文件能够成功打开，则重定向输出一定成功（成功信息输出在重定向前，防止把成功信息打印到文件中）
-        print('重定向输出成功')
-        sys.stdout = fileOut
-    except:
-        print('重定向输出失败，结果打印到标准输出中')
     with open('/home/jeasonlau/Documents/repositories/CP/Experiment_1/test.c', 'r') as f:
         content = f.readlines()
     count = 1
-    try:
-        for line in content:
-            handleLine(line, count)
-            count += 1
-    except:
-        sys.stdout = old
-        print('文件处理过程出现错误，请打开输出文件查看详情...')
-        exit()
-    # 恢复重定向
-    sys.stdout = old
+    for line in content:
+        handleLine(line, count)
+        count += 1
     print('文件处理成功，输出处理后的各表信息：')
     print('标识符表：', iT)
     print('字符表：', cT)
