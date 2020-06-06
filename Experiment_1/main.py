@@ -138,7 +138,7 @@ def handleLine(line, count):
 
 
 def main():
-    with open('/home/jeasonlau/Documents/repositories/CP/Experiment_1/test.c', 'r') as f:
+    with open('/home/jeasonlau/Documents/repositories/Compilation-principle/Experiment_1/test.c', 'r') as f:
         content = f.readlines()
     count = 1
     for line in content:
