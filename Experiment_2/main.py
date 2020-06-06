@@ -11,8 +11,14 @@ class recursive_descent():
         self.analyzer = core.lexical_analyzer(line)
         self.w = ''
 
-    def Z(self):
+    def next(self):
+        '''
+        相当于next(w)
+        '''
         self.w = self.analyzer.getToken()
+
+    def analyse(self):
+        self.next()
         self.E()
         if self.w == '#':
             print('OK,no error found.')
@@ -27,7 +33,7 @@ class recursive_descent():
 
     def E1(self):
         if self.w == 'w0':
-            self.w = self.analyzer.getToken()
+            self.next()
             self.T()
             self.E1()
 
@@ -38,18 +44,18 @@ class recursive_descent():
 
     def T1(self):
         if self.w == 'w1':
-            self.w = self.analyzer.getToken()
+            self.next()
             self.F()
             self.T1()
 
     def F(self):
         if self.w == 'I':
-            self.w = self.analyzer.getToken()
+            self.next()
         elif self.w == '(':
-            self.w = self.analyzer.getToken()
+            self.next()
             self.E()
             if self.w == ')':
-                self.w = self.analyzer.getToken()
+                self.next()
             else:
                 print('error in F->(E)!')
                 print('w = {}'.format(self.w))
@@ -60,6 +66,66 @@ class recursive_descent():
             exit()
 
 
+class LL_1():
+    def __init__(self, line):
+        self.analyzer = core.lexical_analyzer(line)
+        self.w = ''
+        self.stack = []
+        self.map = {
+            ('E', 'I'): ['T', 'E1'],
+            ('E', '('): ['T', 'E1'],
+            ('E1', 'w0'): ['w0', 'T', 'E1'],
+            ('E1', ')'): [],
+            ('E1', '#'): [],
+            ('T', 'I'): ['F', 'T1'],
+            ('T', '('): ['F', 'T1'],
+            ('T1', 'w0'): [],
+            ('T1', 'w1'): ['w1', 'F', 'T1'],
+            ('T1', ')'): [],
+            ('T1', '#'): [],
+            ('F', 'I'): ['I'],
+            ('F', '('): ['(', 'E', ')']
+        }
+        self.VT = ['I', '(', ')', 'w0', 'w1']
+        self.VN = ['E', 'E1', 'T', 'T1', 'F']
+
+    def next(self):
+        '''
+        相当于next(w)
+        '''
+        self.w = self.analyzer.getToken()
+
+    def analyse(self):
+        self.stack.append('#')
+        self.stack.append('E')
+        self.next()
+        while True:
+            tmp = self.stack.pop()
+            if tmp in self.VT:
+                if self.w == tmp:
+                    self.next()
+                    continue
+                else:
+                    print('error, stack[-1]!=w!')
+                    exit()
+            elif tmp in self.VN:
+                if (tmp, self.w) in self.map.keys():
+                    # 逆序压栈
+                    for item in reversed(self.map[(tmp, self.w)]):
+                        self.stack.append(item)
+                else:
+                    print('error, no {} key in map!'.format((tmp, self.w)))
+                    exit()
+            else:
+                if self.w == '#':
+                    print('OK,no error found.')
+                    return
+
+
 if __name__ == '__main__':
-    test = recursive_descent('((1+2-3*4)-5)#')
-    test.Z()
+    recursive_descent = recursive_descent('((1+2-3*4)-5)#')
+    print('recursive descent analyse:')
+    recursive_descent.analyse()
+    LL_1 = LL_1('((1+2-3*4)-5)#')
+    print('LL(1) analyse:')
+    LL_1.analyse()
